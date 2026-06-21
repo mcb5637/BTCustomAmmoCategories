@@ -1,4 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup Condition="$(OS) == 'Unix'">
+        <FrameworkPathOverride>/usr/lib/mono/4.7.2-api</FrameworkPathOverride>
+        <EnableFrameworkPathOverride>true</EnableFrameworkPathOverride>
+    </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
@@ -11,9 +15,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(BattleTechGameDir)\Mods\CAB-CU&quot;" />
-  </Target>
+    <Target Name="AfterBuild">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)\Mods\CAB-CU" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods\CAB-CU')" />
+    </Target>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">

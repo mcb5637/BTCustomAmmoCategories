@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup Condition="$(OS) == 'Unix'">
+        <FrameworkPathOverride>/usr/lib/mono/4.7.2-api</FrameworkPathOverride>
+        <EnableFrameworkPathOverride>true</EnableFrameworkPathOverride>
+    </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   
   <Target Name="ValidateBattleTechGameDir" Condition="'$(BattleTechGameDir)' == '' Or !Exists('$(BattleTechGameDir)')">
@@ -364,24 +368,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
-  <PropertyGroup>
-    <PostBuildEvent>
-if exist "$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories" (
-  copy /Y "$(TargetPath)" "$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories"
-  copy /Y "$(ProjectDir)..\AdditionalFiles\CAC\README.txt" "$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories"
-)
-if exist "$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories" (
-  echo %25BattleTechGameDir%25
-  copy /Y "$(TargetPath)" "$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories"
-  copy /Y "$(ProjectDir)..\AdditionalFiles\CAC\README.txt" "$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories"
-)
-if exist "$(RogueTechRepo)\Core\CustomAmmoCategories" (
-  echo %25BattleTechGameDir%25
-  copy /Y "$(TargetPath)" "$(RogueTechRepo)\Core\CustomAmmoCategories"
-  copy /Y "$(ProjectDir)..\AdditionalFiles\CAC\README.txt" "$(RogueTechRepo)\Core\CustomAmmoCategories"
-)
-		</PostBuildEvent>
-  </PropertyGroup>
+    <Target Name="AfterBuild">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories')" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories')" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(RogueTechRepo)\Core\CustomAmmoCategories" Condition="'$(RogueTechRepo)' != '' And Exists('$(RogueTechRepo)\Core\CustomAmmoCategories')" />
+        <Copy SourceFiles="$(ProjectDir)..\AdditionalFiles\CAC\README.txt" DestinationFolder="$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods\Core\CustomAmmoCategories')" />
+        <Copy SourceFiles="$(ProjectDir)..\AdditionalFiles\CAC\README.txt" DestinationFolder="$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories" Condition="'$(BattleTechGameDir)' != '' And Exists('$(BattleTechGameDir)\Mods_CBDE\Core\CustomAmmoCategories')" />
+        <Copy SourceFiles="$(ProjectDir)..\AdditionalFiles\CAC\README.txt" DestinationFolder="$(RogueTechRepo)\Core\CustomAmmoCategories" Condition="'$(RogueTechRepo)' != '' And Exists('$(RogueTechRepo)\Core\CustomAmmoCategories')" />
+    </Target>
   <Target Name="BeforeBuild" Inputs="@(Preprocess)" Outputs="@(Preprocess->'%(Filename)_P.cs')">
     <Exec Command="..\Bin\cpp.exe @(Preprocess) -P -o %(RelativeDir)%(Filename)_P.cs" />
     <CreateItem Include="@(Preprocess->'%(RelativeDir)%(Filename)_P.cs')">
